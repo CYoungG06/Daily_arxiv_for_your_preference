@@ -1,0 +1,27 @@
+# keywords to search
+keywords:
+    "Large Language Models":
+        filters: ["LLM", "Large Language Model", "GPT", 
+                  "Foundation Model", "Generative AI", "Language Model"]
+    "NLP":
+        filters: ["Natural Language Processing", "NLP", "Language Understanding", 
+                  "Language Generation", "Text Analysis", "Semantic Understanding"]
+    "LLM Agents":
+        filters: ["LLM Agent", "AI Agent", "Autonomous Agent", 
+                  "Multi-agent", "Agent Framework", "Agentic AI"]
+    "Reinforcement Learning with LLMs":
+        filters: ["RLHF", "RL", "Reinforcement Learning", 
+                  "PPO", "DPO", "RLAIF", "Human Feedback", 
+                  "GRPO", "Constitutional AI"]
+    "Mixture of Experts":
+        filters: ["MoE", "Mixture of Experts", "Sparse MoE", 
+                  "Routing", "Conditional Computation", 
+                  "Expert Models"]
+    "LLM Fine-tuning":
+        filters: ["Fine-tuning", "PEFT", "LoRA", "QLoRA", 
+                  "Adapter", "Prompt Tuning", "Instruction Tuning", 
+                  "SFT", "Parameter-Efficient"]
+    # "Multimodal LLMs":
+    #     filters: ["Multimodal", "Vision-Language", "MLLM", 
+    #               "Image Understanding", "Visual-Language Models", 
+    #               "Text-to-Image", "Image-to-Text"]

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}arXiv Paper Search - Results{% endblock %}
+
+{% block head %}
+<style>
+    .paper-card {
+        transition: transform 0.3s ease;
+    }
+    .paper-card:hover {
+        transform: translateY(-5px);
+    }
+    .paper-abstract {
+        max-height: 120px;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+    .paper-abstract.expanded {
+        max-height: 1000px;
+    }
+    .expand-btn {
+        cursor: pointer;
+        color: #0d6efd;
+    }
+    .topic-header {
+        background-color: #f8f9fa;
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        border-left: 5px solid #0d6efd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-search-results"></i> Search Results</h2>
+    <a href="{{ url_for('index') }}" class="btn btn-primary">
+        <i class="fas fa-search"></i> New Search
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Search Parameters</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <p><strong>Date Range:</strong><br>{{ date_from }} to {{ date_to }}</p>
+            </div>
+            <div class="col-md-3">
+                <p><strong>Max Results per Topic:</strong><br>{{ max_results }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Categories:</strong><br>
+                {% if categories %}
+                    {{ categories|join(', ') }}
+                {% else %}
+                    All Categories
+                {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if results %}
+    {% for topic, papers in results.items() %}
+        {% if papers %}
+            <div class="topic-header">
+                <h3>{{ topic }} <span class="badge bg-primary">{{ papers|length }}</span></h3>
+            </div>
+            
+            <div class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+                {% for paper in papers %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm paper-card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span class="badge bg-info">{{ paper.category }}</span>
+                                <span class="text-muted small">{{ paper.update_date }}</span>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ paper.title }}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">{{ paper.first_author }}{% if paper.authors.count(',') > 0 %} et al.{% endif %}</h6>
+                                
+                                <div class="paper-abstract mt-3">
+                                    <p class="card-text">{{ paper.abstract }}</p>
+                                </div>
+                                <div class="text-center mt-2">
+                                    <span class="expand-btn">
+                                        <i class="fas fa-chevron-down"></i> Show More
+                                    </span>
+                                </div>
+                                
+                                {% if paper.comments %}
+                                    <div class="mt-3">
+                                        <strong>Comments:</strong> {{ paper.comments }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ paper.url }}" class="btn btn-primary btn-sm" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> View on arXiv
+                                </a>
+                                <a href="https://scholar.google.com/scholar?q={{ paper.title|urlencode }}" class="btn btn-outline-secondary btn-sm" target="_blank">
+                                    <i class="fas fa-graduation-cap"></i> Google Scholar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endfor %}
+{% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> No papers found matching your search criteria. Try adjusting your search parameters.
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Toggle abstract expansion
+        $(".expand-btn").click(function() {
+            const abstract = $(this).parent().prev(".paper-abstract");
+            abstract.toggleClass("expanded");
+            
+            if (abstract.hasClass("expanded")) {
+                $(this).html('<i class="fas fa-chevron-up"></i> Show Less');
+            } else {
+                $(this).html('<i class="fas fa-chevron-down"></i> Show More');
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}arXiv Paper Search - Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="fas fa-search"></i> Search arXiv Papers</h3>
+            </div>
+            <div class="card-body">
+                <form id="searchForm" action="{{ url_for('search') }}" method="post">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h4>Date Range</h4>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="date_from" class="form-label">From Date</label>
+                                    <input type="date" class="form-control" id="date_from" name="date_from" value="{{ week_ago }}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="date_to" class="form-label">To Date</label>
+                                    <input type="date" class="form-control" id="date_to" name="date_to" value="{{ today }}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Search Settings</h4>
+                            <div class="mb-3">
+                                <label for="max_results" class="form-label">Maximum Results per Topic</label>
+                                <input type="number" class="form-control" id="max_results" name="max_results" min="1" max="100" value="30">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h4>arXiv Categories</h4>
+                        <div class="category-container">
+                            {% for category in categories %}
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="category_{{ category }}" name="categories" value="{{ category }}">
+                                <label class="form-check-label" for="category_{{ category }}">{{ category }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4>Search Topics and Keywords</h4>
+                            <button type="button" id="addTopicBtn" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> Add Topic
+                            </button>
+                        </div>
+                        
+                        <div id="topicsContainer">
+                            {% for topic, data in keywords.items() %}
+                            <div class="topic-group card mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <h5 class="card-title">Topic</h5>
+                                        <button type="button" class="btn btn-danger btn-sm remove-topic">
+                                            <i class="fas fa-trash"></i> Remove
+                                        </button>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-2">
+                                            <label class="form-label">Topic Name</label>
+                                            <input type="text" class="form-control topic-name" name="topic_{{ loop.index0 }}" value="{{ topic }}" required>
+                                        </div>
+                                        <div class="col-md-8 mb-2">
+                                            <label class="form-label">Filter Keywords (comma separated)</label>
+                                            <input type="text" class="form-control topic-filters" name="filters_{{ loop.index0 }}" value="{{ data.filters|join(', ') }}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="button" id="saveConfigBtn" class="btn btn-secondary">
+                            <i class="fas fa-save"></i> Save Configuration
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search Papers
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        let topicCounter = {{ keywords|length }};
+        
+        // Add new topic
+        $("#addTopicBtn").click(function() {
+            const newTopic = `
+                <div class="topic-group card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <h5 class="card-title">Topic</h5>
+                            <button type="button" class="btn btn-danger btn-sm remove-topic">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label">Topic Name</label>
+                                <input type="text" class="form-control topic-name" name="topic_${topicCounter}" required>
+                            </div>
+                            <div class="col-md-8 mb-2">
+                                <label class="form-label">Filter Keywords (comma separated)</label>
+                                <input type="text" class="form-control topic-filters" name="filters_${topicCounter}" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $("#topicsContainer").append(newTopic);
+            topicCounter++;
+        });
+        
+        // Remove topic
+        $(document).on("click", ".remove-topic", function() {
+            $(this).closest(".topic-group").remove();
+            renumberTopics();
+        });
+        
+        // Renumber topics after removal
+        function renumberTopics() {
+            $(".topic-group").each(function(index) {
+                $(this).find(".topic-name").attr("name", `topic_${index}`);
+                $(this).find(".topic-filters").attr("name", `filters_${index}`);
+            });
+            topicCounter = $(".topic-group").length;
+        }
+        
+        // Save configuration
+        $("#saveConfigBtn").click(function() {
+            $.ajax({
+                url: "{{ url_for('save_config') }}",
+                type: "POST",
+                data: $("#searchForm").serialize(),
+                success: function(response) {
+                    if (response.status === "success") {
+                        alert("Configuration saved successfully!");
+                    } else {
+                        alert("Error: " + response.message);
+                    }
+                },
+                error: function() {
+                    alert("An error occurred while saving the configuration.");
+                }
+            });
+        });
+        
+        // Select all categories
+        $("#selectAllCategories").click(function() {
+            $("input[name='categories']").prop("checked", true);
+        });
+        
+        // Deselect all categories
+        $("#deselectAllCategories").click(function() {
+            $("input[name='categories']").prop("checked", false);
+        });
+    });
+</script>
+{% endblock %}

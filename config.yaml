@@ -1,0 +1,47 @@
+keywords:
+  LLM Agents:
+    filters:
+    - LLM Agent
+    - AI Agent
+    - Autonomous Agent
+    - Multi-agent
+    - Agent Framework
+    - Agentic AI
+  LLM Fine-tuning:
+    filters:
+    - Fine-tuning
+    - PEFT
+    - LoRA
+    - QLoRA
+    - Adapter
+    - Prompt Tuning
+    - Instruction Tuning
+    - SFT
+    - Parameter-Efficient
+  Large Language Models:
+    filters:
+    - LLM
+    - Large Language Model
+    - GPT
+    - Foundation Model
+    - Generative AI
+    - Language Model
+  Mixture of Experts:
+    filters:
+    - MoE
+    - Mixture of Experts
+    - Sparse MoE
+    - Routing
+    - Conditional Computation
+    - Expert Models
+  Reinforcement Learning with LLMs:
+    filters:
+    - RLHF
+    - RL
+    - Reinforcement Learning
+    - PPO
+    - DPO
+    - RLAIF
+    - Human Feedback
+    - GRPO
+    - Constitutional AI
