@@ -144,3 +144,40 @@ body {
         width: 100%;
     }
 }
+
+/* 添加到现有的.topic-group样式中 */
+.topic-group {
+    transition: all 0.3s ease;
+    background-color: transparent;
+}
+
+/* 为滑动动画添加过渡效果 */
+@keyframes highlightNew {
+    from { background-color: #e6f7ff; }
+    to { background-color: transparent; }
+}
+
+@keyframes highlightRemove {
+    from { background-color: #ffebee; }
+    to { background-color: transparent; }
+}
+
+.highlight-new {
+    animation: highlightNew 1s ease;
+}
+
+.highlight-remove {
+    animation: highlightRemove 1s ease;
+}
+
+/* 从顶部滑入的动画 */
+@keyframes slideInFromTop {
+    0% {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

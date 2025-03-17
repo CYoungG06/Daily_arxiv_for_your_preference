@@ -84,7 +84,16 @@
                         <button type="button" id="saveConfigBtn" class="btn btn-secondary">
                             <i class="fas fa-save"></i> Save Configuration
                         </button>
-                        <button type="submit" class="btn btn-primary">
+                        <!-- 在提交按钮上方添加 -->
+                        <div id="searchSpinner" class="d-none text-center my-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Searching...</span>
+                            </div>
+                            <p class="mt-2">Searching papers, please wait...</p>
+                        </div>
+
+                        <!-- 修改提交按钮，添加id -->
+                        <button type="submit" id="searchButton" class="btn btn-primary">
                             <i class="fas fa-search"></i> Search Papers
                         </button>
                     </div>
@@ -100,10 +109,10 @@
     $(document).ready(function() {
         let topicCounter = {{ keywords|length }};
         
-        // Add new topic
+        // 添加新topic（从顶部添加）
         $("#addTopicBtn").click(function() {
-            const newTopic = `
-                <div class="topic-group card mb-3">
+            const newTopic = $(`
+                <div class="topic-group card mb-3" style="display: none;">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
                             <h5 class="card-title">Topic</h5>
@@ -123,15 +132,53 @@
                         </div>
                     </div>
                 </div>
-            `;
-            $("#topicsContainer").append(newTopic);
+            `);
+            
+            // 添加到容器顶部而不是底部
+            $("#topicsContainer").prepend(newTopic);
+            
+            // 使用动画效果显示（从上方滑入）
+            newTopic.slideDown(300).css("background-color", "#e6f7ff").delay(500).queue(function(next) {
+                $(this).css("background-color", "");
+                next();
+            });
+            
+            // 滚动到顶部元素
+            $('html, body').animate({
+                scrollTop: newTopic.offset().top - 100
+            }, 500);
+            
             topicCounter++;
-        });
-        
-        // Remove topic
-        $(document).on("click", ".remove-topic", function() {
-            $(this).closest(".topic-group").remove();
+            
+            // 重新编号所有topic
             renumberTopics();
+        });
+            
+        // 添加搜索按钮点击事件处理
+        $("#searchForm").on("submit", function() {
+            // 禁用搜索按钮
+            $("#searchButton").prop("disabled", true);
+            $("#searchButton").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Searching...');
+            
+            // 显示搜索中指示器
+            $("#searchSpinner").removeClass("d-none");
+            
+            // 表单正常提交
+            return true;
+        });
+
+        // 删除topic
+        $(document).on("click", ".remove-topic", function() {
+            const topicGroup = $(this).closest(".topic-group");
+            
+            // 添加淡出和收缩的动画效果
+            topicGroup.css("background-color", "#ffebee")
+                    .fadeOut(300, function() {
+                        $(this).slideUp(200, function() {
+                            $(this).remove();
+                            renumberTopics();
+                        });
+                    });
         });
         
         // Renumber topics after removal
